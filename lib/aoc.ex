@@ -1,18 +1,23 @@
 defmodule AOC do
-  @moduledoc """
-  Documentation for `AOC`.
-  """
+  use Application
 
-  @doc """
-  Hello world.
+  def solve(1, 1), do: AOC.Day1.solve_one()
+  def solve(1, 2), do: AOC.Day1.solve_two()
+  def solve(_, _), do: raise("Invalid day and part")
 
-  ## Examples
+  def start(_type, _args) do
+    day =
+      IO.gets("What day do you want to solve?\t\t")
+      |> String.replace("\n", "")
+      |> String.to_integer()
 
-      iex> AOC.hello()
-      :world
+    part =
+      IO.gets("Which part do you want to solve?\t")
+      |> String.replace("\n", "")
+      |> String.to_integer()
 
-  """
-  def hello do
-    :world
+    solve(day, part) |> IO.inspect(charlists: :as_lists)
+    children = []
+    Supervisor.start_link(children, strategy: :one_for_all, name: AOC.Supervisor)
   end
 end
