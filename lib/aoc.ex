@@ -9,6 +9,8 @@ defmodule AOC do
   def solve(3, 2), do: AOC.Day3.solve_two()
   def solve(4, 1), do: AOC.Day4.solve_one()
   def solve(4, 2), do: AOC.Day4.solve_two()
+  def solve(5, 1), do: AOC.Day5.solve_one()
+  def solve(5, 2), do: AOC.Day5.solve_two()
   def solve(_, _), do: raise("Invalid day and part")
 
   def start(_type, _args) do
