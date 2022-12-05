@@ -18,7 +18,6 @@ defmodule AOC.Day5 do
 
     instructions =
       instruction_lines
-      |> Enum.at(1)
       |> String.split("\n")
       |> Enum.map(fn row ->
         instruction_row_regex
@@ -81,10 +80,7 @@ defmodule AOC.Day5 do
 
         if to_remove != nil do
           updated
-          |> Map.get_and_update!(
-            to,
-            fn cur -> {cur, [to_remove | cur]} end
-          )
+          |> Map.get_and_update!(to, fn cur -> {cur, [to_remove | cur]} end)
           |> elem(1)
         else
           updated
@@ -94,17 +90,33 @@ defmodule AOC.Day5 do
     move_crates(rest, updated_tower)
   end
 
+  defp bulk_move_crates([], tower), do: tower
+
+  defp bulk_move_crates([[quantity, from, to] | rest], tower) do
+    {original, updated} =
+      tower
+      |> Map.get_and_update!(from, fn cur -> {cur, cur |> Enum.slice(quantity..length(cur))} end)
+
+    to_move = original |> Enum.slice(0..(quantity - 1))
+
+    updated_tower =
+      updated |> Map.get_and_update!(to, fn cur -> {cur, to_move ++ cur} end) |> elem(1)
+
+    bulk_move_crates(rest, updated_tower)
+  end
+
+  defp get_top_crates(tower),
+    do: tower |> Enum.map(&(&1 |> elem(1) |> Enum.at(0) |> String.at(1))) |> Enum.join("")
+
   def solve_one() do
     {tower, instructions} = collect()
 
-    move_crates(instructions, tower)
-    |> Enum.map(fn {_, crates} ->
-      crates |> Enum.at(0) |> String.at(1)
-    end)
-    |> Enum.join("")
+    move_crates(instructions, tower) |> get_top_crates()
   end
 
   def solve_two() do
-    collect()
+    {tower, instructions} = collect()
+
+    bulk_move_crates(instructions, tower) |> get_top_crates()
   end
 end
