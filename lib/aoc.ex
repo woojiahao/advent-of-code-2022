@@ -15,15 +15,18 @@ defmodule AOC do
   defp solve(6, 2), do: AOC.Day6.solve_two()
   defp solve(_, _), do: raise("Invalid day and part")
 
+  defp ask(prompt),
+    do:
+      IO.gets("#{prompt} :: ")
+      |> String.replace("\n", "")
+
   defp prompt() do
     day =
-      IO.gets("What day do you want to solve?\t\t")
-      |> String.trim()
+      ask("What day do you want to solve?")
       |> String.to_integer()
 
     part =
-      IO.gets("Which part do you want to solve?\t")
-      |> String.trim()
+      ask("Which part do you want to solve?")
       |> String.to_integer()
 
     solve(day, part) |> IO.inspect(charlists: :as_lists)
@@ -36,9 +39,7 @@ defmodule AOC do
   end
 
   def start(_type, _args) do
-    default? = IO.gets("Run today's problems? :: ") |> String.replace("\n", "")
-
-    case default? do
+    case ask("Run today's problems? (blank to default to [yes])") do
       "" -> today()
       _ -> prompt()
     end

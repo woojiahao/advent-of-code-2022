@@ -1,21 +1,27 @@
 # AOC
 
-**TODO: Add description**
+Clone the repository to use
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `aoc22` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:aoc22, "~> 0.1.0"}
-  ]
-end
+```bash
+git clone https://github.com/woojiahao/advent-of-code-2022.git aoc22/
+cd aoc22/
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/aoc22>.
+To run today's solutions:
 
+```text
+mix run
+> Run today's problems? (blank to default to [yes]) ::
+1876
+2202
+```
+
+To run any day's solutions:
+
+```text
+mix run
+> Run today's problems? (blank to default to [yes]) :: no
+> What day do you want to solve? :: 6
+> Which part do you want to solve? :: 1
+1876
+```
