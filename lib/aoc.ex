@@ -13,6 +13,8 @@ defmodule AOC do
   defp solve(5, 2), do: AOC.Day5.solve_two()
   defp solve(6, 1), do: AOC.Day6.solve_one()
   defp solve(6, 2), do: AOC.Day6.solve_two()
+  defp solve(7, 1), do: AOC.Day7.solve_one()
+  defp solve(7, 2), do: AOC.Day7.solve_two()
   defp solve(_, _), do: raise("Invalid day and part")
 
   defp ask(prompt),
