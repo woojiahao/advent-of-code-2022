@@ -2,7 +2,7 @@ defmodule AOC.Day8 do
   defp collect(),
     do:
       AOC.Utils.load_day(8)
-      |> Enum.map(&String.split(&1, "", trim: true))
+      |> Enum.map(&String.graphemes/1)
       |> Enum.map(fn l -> l |> Enum.map(&String.to_integer/1) end)
 
   # Assuming square grid
