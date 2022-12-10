@@ -1,9 +1,9 @@
 defmodule AOC.Day10 do
-  defp collect() do
-    AOC.Utils.load_day(10)
-    |> run()
-    |> Enum.reverse()
-  end
+  defp collect(),
+    do:
+      AOC.Utils.load_day(10)
+      |> run()
+      |> Enum.reverse()
 
   # Returns what the list will look like during the cycle at the index (one-based)
   defp run(instructions), do: run(instructions, 0, [1])
@@ -18,8 +18,8 @@ defmodule AOC.Day10 do
 
   defp map_pixel([], _, _, drawing), do: drawing
 
-  defp map_pixel([{_, x_start} | rest], r, c, drawing) do
-    window = x_start..(x_start + 2)
+  defp map_pixel([start | rest], r, c, drawing) do
+    window = start..(start + 2)
 
     updated_c = if c + 1 == 40, do: 0, else: c + 1
     updated_r = if c + 1 == 40, do: r + 1, else: r
@@ -43,14 +43,13 @@ defmodule AOC.Day10 do
     |> Enum.zip(collect())
     |> Enum.reduce(0, fn
       {20, v}, _ -> 20 * v
-      {i, v}, acc when rem(i - 20, 40) == 0 -> acc + i * v
+      {i, v}, acc when rem(i, 40) == 20 -> acc + i * v
       _, acc -> acc
     end)
   end
 
   def solve_two() do
-    1..length(collect())
-    |> Enum.zip(collect())
+    collect()
     |> map_pixel()
     |> draw()
     |> Enum.map(&Enum.join(&1, ""))
