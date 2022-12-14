@@ -55,10 +55,11 @@ defmodule AOC do
   end
 
   def start(_type, _args) do
-    case ask("Run today's problems? (blank to default to [yes])") do
-      "" -> today()
-      _ -> prompt()
-    end
+    # case ask("Run today's problems? (blank to default to [yes])") do
+    #   "" -> today()
+    #   _ -> prompt()
+    # end
+    solve(14, 1) |> IO.inspect()
 
     children = []
     Supervisor.start_link(children, strategy: :one_for_all, name: AOC.Supervisor)

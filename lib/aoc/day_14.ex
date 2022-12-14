@@ -1,6 +1,19 @@
 defmodule AOC.Day14 do
   @sand_source [500, 0]
 
+  @moduledoc """
+  Every sand dropped, we get the floor of the latest element directly below the sand source
+
+  The initial target is one block directly above the floor. Once dropped, check if the floor
+  has a left particle. If a left particle does not exist, then move the current particle to
+  that position and check again. If the left particle exists, then check if the floor has a
+  right particle. If a right particle does not exist, then move the current particle to that
+  position and check again. IF the right particle exists, keep the particle at the original.
+
+  As you check for positions, if the immediate left or right particles are filled, then don't
+  move anymore
+  """
+
   defp collect(),
     do:
       AOC.Utils.load_day(14)
@@ -8,61 +21,105 @@ defmodule AOC.Day14 do
       |> Enum.map(fn l ->
         l |> Enum.map(fn c -> c |> String.split(",") |> Enum.map(&String.to_integer/1) end)
       end)
-      |> then(fn rocks ->
-        flattened = rocks |> Enum.flat_map(& &1)
-        min_x = flattened |> Enum.min_by(fn [x, _] -> x end) |> Enum.at(0)
-        max_x = flattened |> Enum.max_by(fn [x, _] -> x end) |> Enum.at(0)
-        min_y = flattened |> Enum.min_by(fn [_, y] -> y end) |> Enum.at(1)
-        max_y = flattened |> Enum.max_by(fn [_, y] -> y end) |> Enum.at(1)
-
-        organized_rocks =
-          rocks
-          |> Enum.map(fn set ->
-            set
-            |> Enum.chunk_every(2, 1)
-            |> then(fn chunks -> chunks |> Enum.slice(0..(length(chunks) - 2)) end)
-          end)
-
-        {organized_rocks, min_x, max_x, min_y, max_y}
+      |> Enum.map(fn set ->
+        set
+        |> Enum.chunk_every(2, 1)
+        |> then(fn chunks -> chunks |> Enum.slice(0..(length(chunks) - 2)) end)
       end)
+      |> Enum.flat_map(& &1)
+      |> Enum.reduce([], fn
+        [[sx, sy], [sx, ey]], acc ->
+          acc ++ (sy..ey |> Enum.map(fn y -> [sx, y] end))
 
-  defp find_rocks(_, _, _, _, max_y, _, y, cave) when y > max_y, do: cave
-
-  defp find_rocks(rocks, min_x, max_x, min_y, max_y, x, y, cave) do
-    updated_x = if x == max_x, do: min_x, else: x + 1
-    updated_y = if x == max_x, do: y + 1, else: y
-
-    has_rock? =
-      rocks
-      |> Enum.any?(fn r ->
-        r |> Enum.any?(fn [[fx, fy], [sx, sy]] -> x in fx..sx and y in fy..sy end)
+        [[sx, sy], [ex, sy]], acc ->
+          acc ++ (sx..ex |> Enum.map(fn x -> [x, sy] end))
       end)
+      |> Enum.uniq()
 
-    updated_cave = if has_rock?, do: [[x, y] | cave], else: cave
+  defp get_below(particles, x, y),
+    do:
+      particles
+      |> Enum.filter(&(Enum.at(&1, 0) == x))
+      |> Enum.filter(&(Enum.at(&1, 1) >= y))
+      |> Enum.min_by(&Enum.at(&1, 1), fn -> nil end)
 
-    find_rocks(rocks, min_x, max_x, min_y, max_y, updated_x, updated_y, updated_cave)
+  defp drop(particles, [fx, fy]) do
+    if [fx - 1, fy] not in particles do
+      # move to the left
+      # TODO: Don't need to use fx - 1 and fy + 1 since get_below will guarantee it finds that
+      if [fx - 1, fy + 1] not in particles do
+        next_floor = get_below(particles, fx - 1, fy)
+
+        if next_floor == nil do
+          # no more floor below to drop to on the left
+          particles
+        else
+          drop(particles, next_floor)
+        end
+      else
+        drop(particles, [fx - 1, fy + 1])
+      end
+    else
+      # move to the right
+      if [fx + 1, fy] not in particles do
+        if [fx + 1, fy + 1] not in particles do
+          next_floor = get_below(particles, fx + 1, fy)
+
+          if next_floor == nil do
+            # no more floor below to drop to on the right
+            particles
+          else
+            drop(particles, next_floor)
+          end
+        else
+          drop(particles, [fx + 1, fy + 1])
+        end
+      else
+        # can settle at the current position
+        IO.puts("settle on #{inspect([fx, fy - 1])}")
+        updated_particles = [[fx, fy - 1] | particles]
+
+        drop(
+          updated_particles,
+          get_below(updated_particles, Enum.at(@sand_source, 0), Enum.at(@sand_source, 1))
+        )
+      end
+    end
   end
 
-  defp print_cave(rocks, min_x, max_x, min_y, max_y) do
-    min_y..max_y
+  defp print_cave(rocks) do
+    {[min_x, _], [max_x, _]} = rocks |> Enum.min_max_by(fn [x, _] -> x end)
+    {_, [_, max_y]} = rocks |> Enum.min_max_by(fn [_, y] -> y end)
+
+    0..max_y
     |> Enum.reduce("", fn y, cave ->
-      row =
+      line =
         min_x..max_x
         |> Enum.reduce("", fn x, line ->
-          if [x, y] in rocks, do: line <> "#", else: line <> "."
+          if [x, y] == @sand_source,
+            do: line <> "+",
+            else: if([x, y] in rocks, do: line <> "#", else: line <> ".")
         end)
 
-      cave <> row <> "\n"
+      cave <> line <> "\n"
     end)
     |> IO.puts()
   end
 
   def solve_one() do
     collect()
-    |> then(fn {rocks, min_x, max_x, min_y, max_y} ->
-      find_rocks(rocks, min_x, max_x, min_y, max_y, min_x, min_y, [])
+    |> then(fn rocks ->
+      print_cave(rocks)
+      target_tile = get_below(rocks, Enum.at(@sand_source, 0), Enum.at(@sand_source, 1))
+
+      drop(rocks, target_tile)
+      |> then(fn final ->
+        print_cave(final)
+        final
+      end)
+      |> then(&(&1 -- rocks))
+      |> Enum.count()
     end)
-    |> IO.puts()
   end
 
   def solve_two() do
