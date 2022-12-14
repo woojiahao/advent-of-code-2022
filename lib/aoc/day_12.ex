@@ -63,8 +63,8 @@ defmodule AOC.Day12 do
     do: bfs(m, [start], [], %{gen_key(start) => 0}) |> Map.get(gen_key(target))
 
   def solve_one() do
-    {m, start, target} = collect()
-    solve(m, start, target)
+    collect()
+    |> then(fn {m, start, target} -> solve(m, start, target) end)
   end
 
   defp find_a(m, r, _, a) when r == length(m), do: a
@@ -78,10 +78,9 @@ defmodule AOC.Day12 do
   end
 
   def solve_two() do
-    {m, _, target} = collect()
-
-    find_a(m, 0, 0, [])
-    |> Enum.map(fn a -> solve(m, a, target) end)
-    |> Enum.min()
+    collect()
+    |> then(fn {m, _, target} ->
+      find_a(m, 0, 0, []) |> Enum.map(&solve(m, &1, target)) |> Enum.min()
+    end)
   end
 end

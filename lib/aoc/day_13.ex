@@ -1,22 +1,4 @@
 defmodule AOC.Day13 do
-  @moduledoc """
-  Rules:
-  1. If both are numbers
-    a) left < right => whole input right order
-    b) left > right => whole input wrong order
-    c) left == right => move to next pair
-  2. If both are lists, compare individual elements of list with rule (1)
-    a) len(left) < len(right) => whole input right order
-    b) len(left) > len(right) => whole input wrong order
-    c) len(left) == len(right) => move to the next pair
-  3. If one is an integer, convert to a list and compare only using (1) (rules of (2) do not apply)
-
-  Status codes:
-  1. 1 => valid
-  2. 0 => inconclusive
-  3. -1 => invalid
-  """
-
   defp collect(),
     do:
       AOC.Utils.load_day(13, "\n\n")
@@ -31,9 +13,8 @@ defmodule AOC.Day13 do
 
   defp compare([l | lr], [r | rr]) when is_integer(l) and is_integer(r) do
     cond do
-      l < r -> :valid
       l == r -> compare(lr, rr)
-      true -> :invalid
+      true -> if l < r, do: :valid, else: :invalid
     end
   end
 
@@ -41,10 +22,9 @@ defmodule AOC.Day13 do
     left = if is_list(l), do: l, else: [l]
     right = if is_list(r), do: r, else: [r]
 
-    case compare(left, right) do
-      :valid -> :valid
+    case status = compare(left, right) do
       :inconclusive -> compare(lr, rr)
-      _ -> :invalid
+      _ -> status
     end
   end
 
@@ -73,21 +53,17 @@ defmodule AOC.Day13 do
   end
 
   def solve_two() do
-    [{_, f}, {_, s}] =
-      collect()
-      |> Enum.flat_map(fn {l, r} -> [l, r] end)
-      |> then(fn l -> l ++ [[[2]], [[6]]] end)
-      |> Enum.map(fn el -> {el, full_flat(el)} end)
-      |> Enum.sort_by(&elem(&1, 1))
-      |> IO.inspect(charlists: :as_list)
-      |> Enum.with_index(1)
-      |> Enum.filter(fn
-        {{[[2]], _}, _} -> true
-        {{[[6]], _}, _} -> true
-        {_, _} -> false
-      end)
-      |> IO.inspect()
-
-    f * s
+    collect()
+    |> Enum.flat_map(fn {l, r} -> [l, r] end)
+    |> then(fn l -> l ++ [[[2]], [[6]]] end)
+    |> Enum.map(fn el -> {el, full_flat(el)} end)
+    |> Enum.sort_by(&elem(&1, 1))
+    |> Enum.with_index(1)
+    |> Enum.filter(fn
+      {{[[2]], _}, _} -> true
+      {{[[6]], _}, _} -> true
+      {_, _} -> false
+    end)
+    |> then(fn [{_, f}, {_, s}] -> f * s end)
   end
 end
