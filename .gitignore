@@ -27,3 +27,4 @@ aoc22-*.tar
 
 .idea/
 *.iml
+.vscode/
