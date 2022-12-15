@@ -59,7 +59,7 @@ defmodule AOC do
     #   "" -> today()
     #   _ -> prompt()
     # end
-    solve(14, 1) |> IO.inspect()
+    solve(14, 2) |> IO.inspect()
 
     children = []
     Supervisor.start_link(children, strategy: :one_for_all, name: AOC.Supervisor)
